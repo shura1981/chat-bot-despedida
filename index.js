@@ -34,7 +34,7 @@ app.use(bodyParser.text()); // support text plain encoded bodies
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); // support encoded bodies
 app.set('port', process.env.PORT || port);
 //Configurar ruta a archivos estáticos
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 const server = app.listen(app.get('port'), () => {
     console.log(`server  on port: , http://localhost:${app.get('port')}`);
 });

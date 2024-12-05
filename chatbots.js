@@ -2,34 +2,56 @@ const { repplyMessage, getDate, getTime, pause, writeMessagesPoll, removeEmojis,
 const { List, Buttons, MessageMedia } = require('whatsapp-web.js');
 const fs = require('fs');
 const path = require('path');
+const ClientResponse = require('./core/interfaces/MessageClient.json');
+const chatController = require('./core/controllers/chatController');
 
 const messageQuestion = `
- Hola 👋 *Briggite* te escribimos de nutramerican pharma, queremos invitarte a la despedida de fin de año, por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:
+Hola 👋 *[nombre]* Nutramerican Pharma tiene el gusto de invitarte a la despedida de fin de año, por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:
 
 1️⃣ ¡Por supuesto que voy! no me lo pierdo por nada del mundo.
-2️⃣ Si voy
-3️⃣ Todas las anteriores.
+
+2️⃣ No puedo ir, pero gracias por la invitación.
 
 Simplemente responde con el número correspondiente. ¡Espero tu respuesta! 💪⭐
 `
 
-const optionResponse = {
-    whatsappPagina: `
-¡Super! 🥳 ahora elije la ruta más cercana de tu casa:
+const flujoDeRespuesta = {
+    confirmacion: {
+        mensaje: `
+        ¡Super! 🥳 ahora elije la ruta más cercana de tu casa:
+        
+        1️⃣ Rozo.
+        2️⃣ Troncal.
+        3️⃣ Sameco.
+        4️⃣ Terminal logístico.
+        5️⃣ Palmira.
+        
+        Simplemente responde con el número correspondiente. ¡Espero tu respuesta! 💪⭐`,
+        patron: "por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:"
+    },
+    volverAInvitar: {
+        mensaje: `
+¿Enserio te vas a perder la despedida de fin de año? 😢, vamos anímate y confirma tu asistencia. Digita el número de tu respuesta:
 
-1️⃣ Rozo.
-2️⃣ Troncal.
-3️⃣ Sameco.
-4️⃣ Terminal logístico.
-5️⃣ Palmira.
-
-Simplemente responde con el número correspondiente. ¡Espero tu respuesta! 💪⭐`
+1️⃣ ¡Si voy!.
+2️⃣ lo siento pero no puedo ir, de nuevo gracias por la invitación.
+`,
+        patron: "por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:"
+    },
+    negativo: {
+        mensaje: `¡Qué pena! 😢 esperamos verte en la próxima oportunidad.`,
+        patron: `¿Enserio te vas a perder la despedida de fin de año?`
+    },
+    despedida: {
+        mensaje: `Te esperamos a las 8:30 am en el punto de encuentro seleccionado, no olvides llevar tu traje de baño 🩲🩱🩳.`,
+        patron: `¡Super! 🥳 ahora elije la ruta más cercana de tu casa:`
+    }
 }
 
-
-
-
-// chatbots
+/**
+ * 
+ * @param {ClientResponse} msg 
+ */
 const chatbot = async (msg, client) => {
     try {
         if (msg.body === 'video') {
@@ -229,61 +251,128 @@ const chatbot = async (msg, client) => {
     }
 
 }
-
+/**
+ * @return {string} filePath | null
+ * @param {ClientResponse} msg 
+ */
 const saveMedia = async (msg) => {
     try {
         if (msg.hasMedia) {
             try {
                 // Descarga el medio
                 const media = await msg.downloadMedia();
-
                 if (media) {
                     // Define una ruta de almacenamiento
                     const mediaPath = path.join('public', 'whatsapp', 'uploads');
 
                     if (!fs.existsSync(mediaPath)) {
-                        fs.mkdirSync(mediaPath);
+                        fs.mkdirSync(mediaPath, { recursive: true });
                     }
 
-                    // Crear un nombre de archivo único
-                    const fileName = `${new Date().getTime()}.${media.mimetype.split('/')[1]}`;
+                    // Determina la extensión según el mimetype
+                    let extension = media.mimetype.split('/')[1];
+
+                    // Ajusta la extensión para audios
+                    if (media.mimetype.startsWith('audio/')) {
+                        extension = 'ogg'; // Normalizamos a 'ogg'
+                    }
+
+                    // Ajusta la extensión para stickers
+                    const isSticker = media.mimetype === 'image/webp';
+                    const fileName = `${new Date().getTime()}.${isSticker ? 'webp' : extension}`;
                     const filePath = path.join(mediaPath, fileName);
 
                     // Guarda el archivo en el sistema
                     fs.writeFileSync(filePath, media.data, { encoding: 'base64' });
 
-                    console.log(`Archivo guardado: ${filePath}`);
+                    return filePath.split("public/")[1];
                 }
             } catch (error) {
                 console.error('Error al descargar el medio:', error);
             }
         }
     } catch (error) {
-        console.log(error.message);
+        console.error('Error general:', error.message);
     }
-}
+    return null;
+};
 
-
+/**
+ * 
+ * @param {ClientResponse} msg 
+ */
 const chatbotWhatsapp = async (msg) => {
-    if (!(msg.body.includes("1", "si", "uno", "sí", "s", "yes", "y", "2", "dos", "3", "tres", "no"))) {
-        return null;
-    }
-
-    console.log("ingresa", msg.body);
-
-    const { _data, from, to, deviceType, ack, hasMedia, type } = msg;
-
     try {
-        const payload = { id: 1, poll: "botón de whatsapp", message: msg.body, desde: from.replace('@c.us', ''), para: to.replace('@c.us', ''), name: _data.notifyName, estado: ack, dispositivo: deviceType, multimedia: hasMedia, fecha: getDate(), hora: getTime(), type }
+        const { from, body } = msg;
 
-        console.log(payload);
-        writeMessagesPoll(payload);
-        repplyMessage(msg, optionResponse.whatsappPagina);
-        // sendNotification(payload).then(res => {
-        //     if (res.total < 2) repplyMessage(msg, optionResponse.whatsappPagina);
-        //     else repplyMessage(msg, optionResponse.whatsappPaginaSegundaVez);
+        // 1. guardar el mensaje en la base de datos
+        const filePath = await saveMedia(msg);
+        chatController.insertChat(msg, filePath);
+        // 2. determinar la respuesta del chatbot
+        const lastMessage = await chatController.obtenerUltimoChat(from.replace('@c.us', ''));
 
-        // }).catch(e => console.log(e));
+        if (!lastMessage) {
+            return;
+        }
+
+        // validar si body se puede convertir a número
+        const isNumber = !isNaN(body);
+
+        if (!isNumber) {
+            repplyMessage(msg, "Te escribimos de nutramerican, queremos que confirmes tu asistencia a la fiesta de despedida de este año. Por favor ingresa el número que corresponda a tu respuesta.");
+            return;
+        }
+
+        // Crear una expresión regular para buscar la parte del texto
+        const regexPrimerFlujo = new RegExp(flujoDeRespuesta.confirmacion.patron, "i");
+        const regexSegundoFlujo = new RegExp(flujoDeRespuesta.volverAInvitar.patron, "i");
+        const regexTercerFlujo = new RegExp(flujoDeRespuesta.negativo.patron, "i");
+        const regexCuartoFlujo = new RegExp(flujoDeRespuesta.despedida.patron, "i");
+
+        if (regexPrimerFlujo.test(lastMessage)) {
+
+            if (body == 1) {
+                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
+            } else if (body == 2) {
+                await chatController.insertChatReply(msg, flujoDeRespuesta.volverAInvitar.mensaje);
+                repplyMessage(msg, flujoDeRespuesta.volverAInvitar.mensaje);
+            }
+
+            return;
+        }
+
+        if (regexSegundoFlujo.test(lastMessage)) {
+            if (body == 1) {
+                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
+            } else if (body == 2) {
+                await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje);
+                repplyMessage(msg, flujoDeRespuesta.negativo.mensaje);
+            }
+
+            return;
+        }
+
+        if (regexTercerFlujo.test(lastMessage)) {
+            if (body == 1) {
+                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
+            } else if (body == 2) {
+                await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje);
+                repplyMessage(msg, flujoDeRespuesta.negativo.mensaje);
+            }
+
+            return;
+        }
+
+        if (regexCuartoFlujo.test(lastMessage)) {
+            await chatController.insertChatReply(msg, flujoDeRespuesta.despedida.mensaje);
+            repplyMessage(msg, flujoDeRespuesta.despedida.mensaje);
+            return;
+        }
+
+
     } catch (error) {
         console.log(error.message);
     }

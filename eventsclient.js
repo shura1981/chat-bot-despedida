@@ -30,13 +30,8 @@ module.exports = (client) => {
     });
 
     client.on('message', async msg => {
-        const { body, _data, from, to, deviceType, ack, fromMe, hasMedia, type } = msg;
-        // console.log(body, _data.notifyName, from, to, deviceType, ack, fromMe, hasMedia, type, getDate(), getTime());
-        // console.log('MESSAGE RECEIVED',JSON.stringify(msg));
-        // writeMessages({ mensaje: body, desde: from.replace('@c.us', ''), para: to.replace('@c.us', ''), name: _data.notifyName, estado: ack, dispositivo: deviceType, multimedia: hasMedia, fecha: getDate(), hora: getTime(), type })
         // chatbot(msg, client);
         console.log("ingresa....");
-        saveMedia(msg);
         chatbotWhatsapp(msg);
     });
 

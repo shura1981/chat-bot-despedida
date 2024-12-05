@@ -8,6 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "mysql2": "2.2.4",
     "body-parse": "^0.1.0",
     "chalk": "^5.2.0",
     "cors": "^2.8.5",

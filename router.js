@@ -6,6 +6,8 @@ const { getName, pause } = require("./utils.js");
 const fs = require('fs');
 const path = require('path');
 let optionsResponse = 0;
+const { Chat, ChatModel } = require('./core/models/chatModel.js');
+const ResponseClientFile = require("./core/interfaces/ResponseClientFile.json");
 
 module.exports = (client) => {
 
@@ -81,7 +83,7 @@ module.exports = (client) => {
     // nombres de archivos para /file
     router.get('/filesname', async (req, res) => {
         try {
-            const  directoryWhatsapp = path.join(__dirname, 'public', 'whatsapp');
+            const directoryWhatsapp = path.join(__dirname, 'public', 'whatsapp');
             const files = await fs.promises.readdir(directoryWhatsapp);
             res.status(200).send({ files });
         } catch (error) {
@@ -92,15 +94,33 @@ module.exports = (client) => {
     router.get('/file', async (req, res) => {
         try {
             const { to, message, fileName } = req.query;
-            // const valid = await client.isRegisteredUser(to);
-            // if (valid) {
+            const valid = await client.isRegisteredUser(to);
+            if (!valid) {
+                res.status(404).send({ message: 'El número de celular no se encuentra disponible' });
+                return;
+            }
             const number = `${to}@c.us`;
             // obtener directorio raiz más public/whatsapp
-            const  directoryWhatsapp = path.join(__dirname, 'public', 'whatsapp');
+            const directoryWhatsapp = path.join(__dirname, 'public', 'whatsapp');
             const media = MessageMedia.fromFilePath(`${directoryWhatsapp}/${fileName}`);
-            const payload = await client.sendMessage(number, media, { caption: message.replace(/\\n/g, '\n') || null });
-            res.status(200).send({ msg: `envidado a ${to}`, payload });
-            // } else res.status(404).send({ message: 'El número de celular no se encuentra disponible' });
+            /**@type ResponseClientFile */
+            const response = await client.sendMessage(number, media, { caption: message.replace(/\\n/g, '\n') || null });
+            const { from } = response;
+            /**@type Chat */
+            const chat = {
+                desde: from.replace('@c.us', ''),
+                para: to,
+                mensaje: message,
+                tipo: ChatModel.optionsType.BOTH,
+                dispositivo: 'api-rest',
+                name: `usuario: ${to}`,
+                content_type: ChatModel.optionsContentType.IMAGE,
+                url: directoryWhatsapp.split("public/").pop() + '/' + fileName,
+            }
+
+            const idInsert = await new ChatModel().insertChat(chat);
+            res.status(200).send({ msg: `envidado a ${to}`, payload: response, idInsert });
+
         } catch (error) {
             res.status(500).send({ message: 'ocurrió un error en el servidor', error: error.message });
         }
