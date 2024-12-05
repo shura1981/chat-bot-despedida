@@ -1,0 +1,26 @@
+{
+  "name": "chatbot_despedida",
+  "version": "1.0.0",
+  "description": "Chat bot para enviar a los empleados de nutramerican y que confirme la asistencia",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "body-parse": "^0.1.0",
+    "chalk": "^5.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.8",
+    "ora": "^6.1.2",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "file:./local_modules/whatsapp-web.js"
+  },
+  "author": "Steven Realpe",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
