@@ -291,7 +291,7 @@ const saveMedia = async (msg) => {
                     // Guarda el archivo en el sistema
                     fs.writeFileSync(filePath, media.data, { encoding: 'base64' });
 
-                    return filePath.split("public/")[1];
+                    return filePath.split("public\\")[1];
                 }
             } catch (error) {
                 console.error('Error al descargar el medio:', error);

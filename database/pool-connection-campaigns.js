@@ -3,10 +3,10 @@ const dotenv = require('../environments/read_env.js');
 
 const poolConfig = {
     connectionLimit: 60,
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME_CAMPAIGNS,
+    host: "localhost",
+    user:  "steven",
+    password: "UZmsoKVU1XaYNO9a",
+    database: "bd_campaigns",
     dateStrings: true,
     supportBigNumbers: true,
     typeCast: function castField(field, useDefaultTypeCasting) {
