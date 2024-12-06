@@ -1,5 +1,7 @@
 const ClientResponse = require('../interfaces/MessageClient.json');
 const { Chat, ChatModel } = require('../models/chatModel.js');
+const port = Number(process.env.PORT || 3000);
+
 
 const chatController = {};
 
@@ -80,33 +82,34 @@ const getUrlAndContentType = (filePath) => {
  *  @param {string} filePath
  */
 chatController.insertChat = async (msg, filePath) => {
-  
-        const { _data, from, to, deviceType, hasMedia } = msg;
 
-        /**@type Chat */
-        const chat = {
-            desde: from.replace('@c.us', ''),
-            para: to.replace('@c.us', ''),
-            mensaje: msg.body,
-            tipo: filePath ? ChatModel.optionsType.MEDIA : ChatModel.optionsType.TEXT,
-            dispositivo: deviceType,
-            name: _data.notifyName,
-            content_type: ChatModel.optionsContentType.TEXT,
-            url: null,
-        }
+    const { _data, from, to, deviceType, hasMedia } = msg;
 
-        if (filePath) {
-            const { url, content_type } = getUrlAndContentType(filePath);
-            chat.url = url;
-            chat.content_type = content_type;
-        }
+    /**@type Chat */
+    const chat = {
+        desde: from.replace('@c.us', ''),
+        para: to.replace('@c.us', ''),
+        mensaje: msg.body,
+        tipo: filePath ? ChatModel.optionsType.MEDIA : ChatModel.optionsType.TEXT,
+        dispositivo: deviceType,
+        name: _data.notifyName,
+        content_type: ChatModel.optionsContentType.TEXT,
+        url: null,
+        port
+    }
 
-        if (hasMedia && msg.body) {
-            chat.tipo = ChatModel.optionsType.BOTH;
-        }
+    if (filePath) {
+        const { url, content_type } = getUrlAndContentType(filePath);
+        chat.url = url;
+        chat.content_type = content_type;
+    }
 
-        const idInsert= await new ChatModel().insertChat(chat);
-        console.log('chat insertado con id:',idInsert);
+    if (hasMedia && msg.body) {
+        chat.tipo = ChatModel.optionsType.BOTH;
+    }
+
+    const idInsert = await new ChatModel().insertChat(chat);
+    console.log('chat insertado con id:', idInsert);
 }
 
 
@@ -116,25 +119,26 @@ chatController.insertChat = async (msg, filePath) => {
  *  @param {string} reply
  */
 chatController.insertChatReply = async (msg, reply) => {
-  
-    const {  from, to, deviceType  } = msg;
+
+    const { from, to } = msg;
 
     /**@type Chat */
     const chat = {
         para: from.replace('@c.us', ''),
         desde: to.replace('@c.us', ''),
         mensaje: reply,
-        tipo:   ChatModel.optionsType.TEXT,
-        dispositivo: deviceType,
-        name: `usuario: ${to.replace('@c.us', '')}`,
+        tipo: ChatModel.optionsType.TEXT,
+        dispositivo: 'web',
+        name: `${to.replace('@c.us', '')}`,
         content_type: ChatModel.optionsContentType.TEXT,
         url: null,
+        port
     }
 
-   
 
-    const idInsert= await new ChatModel().insertChat(chat);
-    console.log('chat insertado con id:',idInsert);
+
+    const idInsert = await new ChatModel().insertChat(chat);
+    console.log('chat insertado con id:', idInsert);
 }
 
 
@@ -143,7 +147,7 @@ chatController.insertChatReply = async (msg, reply) => {
  * @param {string} numeroContacto 
  * @returns {Promise<string>}
  */
-chatController.obtenerUltimoChat= async (numeroContacto)=>{
+chatController.obtenerUltimoChat = async (numeroContacto) => {
     return await new ChatModel().obtenerUltimoChat(numeroContacto);
 }
 

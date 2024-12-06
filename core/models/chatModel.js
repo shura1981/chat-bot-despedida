@@ -33,7 +33,7 @@ class ChatModel {
             try {
                 /** @type{Result} */
                 const result = await query(`
-                    INSERT INTO tb_chats SET tipo=?,mensaje=?,url=?,desde=?,para=?,content_type=?,dispositivo=?, name=?`, [chat.tipo, chat.mensaje, chat.url, chat.desde, chat.para, chat.content_type, chat.dispositivo, chat.name]);
+                    INSERT INTO tb_chats SET tipo=?,mensaje=?,url=?,desde=?,para=?,content_type=?,dispositivo=?, name=?, port=?`, [chat.tipo, chat.mensaje, chat.url, chat.desde, chat.para, chat.content_type, chat.dispositivo, chat.name, chat.port]);
                 resolve(result.insertId);
             } catch (error) {
                 reject(error);

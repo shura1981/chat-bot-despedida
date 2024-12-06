@@ -4,12 +4,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const express = require('express');
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const STATE = require('./state/index')
+const dotenv = require('./environments/read_env.js');
 
-const NODE_ENV = STATE.dev;
-require('dotenv').config({
-    path: `environments/.env.${NODE_ENV}`
-});
 const port = process.env.PORT;
 
 const client = new Client({

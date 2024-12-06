@@ -8,6 +8,8 @@ const path = require('path');
 let optionsResponse = 0;
 const { Chat, ChatModel } = require('./core/models/chatModel.js');
 const ResponseClientFile = require("./core/interfaces/ResponseClientFile.json");
+const { EmployeeModel } = require('./core/models/employeeModel.js');
+const {MensajeModel}=  require('./core/models/mensajeModel.js');
 
 module.exports = (client) => {
 
@@ -31,55 +33,6 @@ module.exports = (client) => {
             res.status(500).send({ message: 'ocurrió un error en el servidor', error: error.message });
         }
     })
-    // encuentas
-    router.get('/encuesta1', async (req, res) => {
-        const { to, mensajero, cliente } = req.query;
-        try {
-            optionsResponse++;
-            if (optionsResponse > 1) optionsResponse = 0;
-            const number = `${to}@c.us`;
-            let poll = null;
-            if (optionsResponse === 0) {
-                let sections = [{ title: '', rows: [{ title: '😐', description: 'Regular' }, { title: '😃', description: 'Bueno' }, { title: '🤩', description: 'Excelente' }] }];
-                poll = new List(`¿Cómo estuvo la entrega de nuestro especialista en logística *${mensajero}*?\n 😐 😃 🤩`, 'Calificar', sections, ``, 'nutramerican.com');
-                await client.sendMessage(number, `Buen día *${getName(cliente)}*. Te escribimos del call center de *MEGAPLEX*. Nos interesa su opinión sobre nuestro servicio de mensajería. \n¿Te gustaría calificar el servicio?`);
-            } else {
-                poll = new Buttons(`\n¿Qué tal estuvo la entrega de nuestro especialista en logística *${mensajero}*?`, [{ body: '😐 Regular' }, { body: '😃 Bueno' }, { body: '🤩 Excelente' }], `¿Te gustaría Calificar la atención al cliente?\n 😐 😃 🤩`, 'nutramerican pharma');
-                await client.sendMessage(number, `Hola *${getName(cliente)}*. Te escribimos de *MEGAPLEX*. Estamos interesados en mejorar nuestro servicio.`);
-            }
-            await pause(2000);
-            const resWs = await client.sendMessage(number, poll);
-            res.status(200).send(resWs);
-        } catch (error) {
-            res.status(500).send({ message: 'ocurrió un error en el servidor', error: error.message });
-        }
-    })
-
-    router.get('/encuesta2', async (req, res) => {
-        const { to } = req.query;
-        try {
-            let sections = [{ title: 'Quiz de Steven', rows: [{ title: '🐷', description: 'Marrano' }, { title: '🐖', description: 'Gordito' }, { title: '🐽', description: 'Porcino' }] }];
-            let list = new List('Por favor califica que tan gordo está aramburo', 'Calificar', sections, 'Quiz de Steven', 'nutramerican.com');
-            const number = `${to}@c.us`;
-            const resWs = await client.sendMessage(number, list);
-            res.status(200).send({ msg: `envidado a ${to}`, payload: resWs });
-        } catch (error) {
-            res.status(500).send({ message: 'ocurrió un error en el servidor', error: error.message });
-        }
-    })
-
-
-    router.get('/encuesta3', async (req, res) => {
-        try {
-            const { to } = req.query;
-            const list = chatbot_Prueba4.question1();
-            const number = `${to}@c.us`;
-            const resWs = await client.sendMessage(number, list);
-            res.status(200).send({ msg: `envidado a ${to}`, payload: resWs });
-        } catch (error) {
-            res.status(500).send({ message: 'ocurrió un error en el servidor', error: error.message });
-        }
-    });
     // nombres de archivos para /file
     router.get('/filesname', async (req, res) => {
         try {
@@ -105,20 +58,29 @@ module.exports = (client) => {
             const media = MessageMedia.fromFilePath(`${directoryWhatsapp}/${fileName}`);
             /**@type ResponseClientFile */
             const response = await client.sendMessage(number, media, { caption: message.replace(/\\n/g, '\n') || null });
-            const { from } = response;
+            let { from } = response;
+            from = from.replace('@c.us', '');
             /**@type Chat */
             const chat = {
-                desde: from.replace('@c.us', ''),
+                desde: from,
                 para: to,
                 mensaje: message,
                 tipo: ChatModel.optionsType.BOTH,
                 dispositivo: 'api-rest',
-                name: `usuario: ${to}`,
+                name: from,
                 content_type: ChatModel.optionsContentType.IMAGE,
                 url: directoryWhatsapp.split("public/").pop() + '/' + fileName,
+                port: process.env.PORT
             }
 
             const idInsert = await new ChatModel().insertChat(chat);
+            const employee = await new EmployeeModel().obtenerEmpleado(to);
+            if (employee) {
+                const idEmployee = employee.id_empleado;
+                new MensajeModel().insertMensaje(idEmployee, 1);
+            }
+
+
             res.status(200).send({ msg: `envidado a ${to}`, payload: response, idInsert });
 
         } catch (error) {

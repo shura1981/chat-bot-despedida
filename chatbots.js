@@ -3,7 +3,13 @@ const { List, Buttons, MessageMedia } = require('whatsapp-web.js');
 const fs = require('fs');
 const path = require('path');
 const ClientResponse = require('./core/interfaces/MessageClient.json');
+const { MensajeModel } = require('./core/models/mensajeModel.js');
 const chatController = require('./core/controllers/chatController');
+const employeeController = require('./core/controllers/employeeController');
+const { PuntosEncuentro } = require('./core/interfaces/puntoEncuentro.js');
+
+
+const mensajeRespuestaIncorrecta = "Por favor ingresa el número que corresponda a tu respuesta.";
 
 const messageQuestion = `
 Hola 👋 *[nombre]* Nutramerican Pharma tiene el gusto de invitarte a la despedida de fin de año, por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:
@@ -18,15 +24,15 @@ Simplemente responde con el número correspondiente. ¡Espero tu respuesta! 💪
 const flujoDeRespuesta = {
     confirmacion: {
         mensaje: `
-        ¡Super! 🥳 ahora elije la ruta más cercana de tu casa:
-        
-        1️⃣ Rozo.
-        2️⃣ Troncal.
-        3️⃣ Sameco.
-        4️⃣ Terminal logístico.
-        5️⃣ Palmira.
-        
-        Simplemente responde con el número correspondiente. ¡Espero tu respuesta! 💪⭐`,
+¡Super! 🥳 ahora elije la ruta más cercana de tu casa:
+
+1️⃣ Rozo. Primer puente.
+2️⃣ Troncal. Parqueadero parque de la caña.
+3️⃣ Sameco. Tienda D1 Sameco, Cl. 70 #2N-30.
+4️⃣ Terminal logístico. Elitenut. 
+5️⃣ Palmira. Parque Bolivar.
+
+Simplemente responde con el número correspondiente. ¡Espero tu respuesta! 💪⭐`,
         patron: "por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:"
     },
     volverAInvitar: {
@@ -39,11 +45,11 @@ const flujoDeRespuesta = {
         patron: "por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:"
     },
     negativo: {
-        mensaje: `¡Qué pena! 😢 esperamos verte en la próxima oportunidad.`,
+        mensaje: `¡Qué pena! 😢 esperamos contar contigo para el próximo año.`,
         patron: `¿Enserio te vas a perder la despedida de fin de año?`
     },
     despedida: {
-        mensaje: `Te esperamos a las 8:30 am en el punto de encuentro seleccionado, no olvides llevar tu traje de baño 🩲🩱🩳.`,
+        mensaje: `Te esperamos a las 8:30 am en el punto de encuentro seleccionado, no olvides llevar tu traje de baño 🩲🩱🩳. El party será hasta las 6:30 pm`,
         patron: `¡Super! 🥳 ahora elije la ruta más cercana de tu casa:`
     }
 }
@@ -308,21 +314,20 @@ const chatbotWhatsapp = async (msg) => {
         // 1. guardar el mensaje en la base de datos
         const filePath = await saveMedia(msg);
         chatController.insertChat(msg, filePath);
+        const employeer = await employeeController.findEmployee(from.replace('@c.us', ''));
+        if (employeer == null) return; //si el número no está registrado en la base de datos de la campaña no se procesa
+
+
         // 2. determinar la respuesta del chatbot
-        const lastMessage = await chatController.obtenerUltimoChat(from.replace('@c.us', ''));
+        const lastMessage = await chatController.obtenerUltimoChat(from.replace('@c.us', ''));//verificar si el número ya ha sido contactado con el mensaje de la campaña
 
         if (!lastMessage) {
             return;
         }
 
+        const messageModel = new MensajeModel();
         // validar si body se puede convertir a número
         const isNumber = !isNaN(body);
-
-        if (!isNumber) {
-            repplyMessage(msg, "Te escribimos de nutramerican, queremos que confirmes tu asistencia a la fiesta de despedida de este año. Por favor ingresa el número que corresponda a tu respuesta.");
-            return;
-        }
-
         // Crear una expresión regular para buscar la parte del texto
         const regexPrimerFlujo = new RegExp(flujoDeRespuesta.confirmacion.patron, "i");
         const regexSegundoFlujo = new RegExp(flujoDeRespuesta.volverAInvitar.patron, "i");
@@ -331,11 +336,18 @@ const chatbotWhatsapp = async (msg) => {
 
         if (regexPrimerFlujo.test(lastMessage)) {
 
+            if (!isNumber) {
+                repplyMessage(msg, `Te escribimos de nutramerican, queremos que confirmes tu asistencia a la fiesta de despedida de este año. ${mensajeRespuestaIncorrecta}`);
+                return;
+            }
+
             if (body == 1) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
             } else if (body == 2) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.volverAInvitar.mensaje);
+                await messageModel.updateMensaje({ respuesta: 2, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.volverAInvitar.mensaje);
             }
 
@@ -343,8 +355,15 @@ const chatbotWhatsapp = async (msg) => {
         }
 
         if (regexSegundoFlujo.test(lastMessage)) {
+
+            if (!isNumber) {
+                repplyMessage(msg, mensajeRespuestaIncorrecta);
+                return;
+            }
+
             if (body == 1) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
             } else if (body == 2) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje);
@@ -355,8 +374,15 @@ const chatbotWhatsapp = async (msg) => {
         }
 
         if (regexTercerFlujo.test(lastMessage)) {
+
+            if (!isNumber) {
+                repplyMessage(msg, mensajeRespuestaIncorrecta);
+                return;
+            }
+
             if (body == 1) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
             } else if (body == 2) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje);
@@ -367,7 +393,16 @@ const chatbotWhatsapp = async (msg) => {
         }
 
         if (regexCuartoFlujo.test(lastMessage)) {
+
+            if (!isNumber) {
+                repplyMessage(msg, mensajeRespuestaIncorrecta);
+                return;
+            }
+            // guardar en lugar de recogida
             await chatController.insertChatReply(msg, flujoDeRespuesta.despedida.mensaje);
+
+            await messageModel.saveMeetingPlace({ id_employee: employeer.id_empleado, punto_encuentro: PuntosEncuentro.get(parseInt(body)) });
+
             repplyMessage(msg, flujoDeRespuesta.despedida.mensaje);
             return;
         }
@@ -382,5 +417,5 @@ const chatbotWhatsapp = async (msg) => {
 
 
 module.exports = {
-    chatbotWhatsapp, chatbot, saveMedia
+    chatbotWhatsapp, chatbot
 }

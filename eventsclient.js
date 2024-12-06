@@ -1,6 +1,6 @@
 
-const { chatbotWhatsapp, chatbot , saveMedia } = require("./chatbots");
-const { getDate, getTime, writeMessages } = require("./utils");
+const { chatbotWhatsapp, chatbot  } = require("./chatbots");
+ 
 const qrcode = require('qrcode-terminal');
 module.exports = (client) => {
 
@@ -30,8 +30,6 @@ module.exports = (client) => {
     });
 
     client.on('message', async msg => {
-        // chatbot(msg, client);
-        console.log("ingresa....");
         chatbotWhatsapp(msg);
     });
 
