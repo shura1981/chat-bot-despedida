@@ -20,8 +20,8 @@ SendMessagesController.sendMessages = async () => {
     const fileName = 'invitacion.webp';
 
 
-    // const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje();
-    const employees = testEmployees;
+    const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje();
+    // const employees = testEmployees;
     const campaignModel = await new CampaignModel().getCampaign(1);
     if (!campaignModel) return;
 

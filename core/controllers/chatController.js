@@ -108,8 +108,12 @@ chatController.insertChat = async (msg, filePath) => {
         chat.tipo = ChatModel.optionsType.BOTH;
     }
 
+   try {
     const idInsert = await new ChatModel().insertChat(chat);
     console.log('chat insertado con id:', idInsert);
+   } catch (error) {
+    console.log("error al insertar un chat", error.message);
+   }
 }
 
 

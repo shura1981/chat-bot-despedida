@@ -69,7 +69,7 @@ module.exports = (client) => {
                 dispositivo: 'api-rest',
                 name: from,
                 content_type: ChatModel.optionsContentType.IMAGE,
-                url: directoryWhatsapp.split("public/").pop() + '/' + fileName,
+                url: directoryWhatsapp.split("public\\").pop() + '/' + fileName,
                 port: process.env.PORT
             }
 
