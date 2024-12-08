@@ -9,7 +9,7 @@ let optionsResponse = 0;
 const { Chat, ChatModel } = require('./core/models/chatModel.js');
 const ResponseClientFile = require("./core/interfaces/ResponseClientFile.json");
 const { EmployeeModel } = require('./core/models/employeeModel.js');
-const {MensajeModel}=  require('./core/models/mensajeModel.js');
+const { MensajeModel } = require('./core/models/mensajeModel.js');
 
 module.exports = (client) => {
 
@@ -109,8 +109,25 @@ module.exports = (client) => {
             // const valid = await client.isRegisteredUser(to);
             // if (valid) {
             const number = `${to}@c.us`;
+            /**@type ResponseClientFile */
             const resWs = await client.sendMessage(number, message.replace(/\\n/g, '\n'), { linkPreview: true });
-            res.status(200).send({ msg: `envidado a ${to}`, payload: resWs });
+            let { from } = resWs;
+            from = from.replace('@c.us', '');
+            /**@type Chat */
+            const chat = {
+                desde: from,
+                para: to,
+                mensaje: message,
+                tipo: ChatModel.optionsType.BOTH,
+                dispositivo: 'api-rest',
+                name: from,
+                content_type: ChatModel.optionsContentType.IMAGE,
+                url: null,
+                port: process.env.PORT
+            }
+
+            const idInsert = await new ChatModel().insertChat(chat);
+            res.status(200).send({ msg: `envidado a ${to}`, payload: resWs, idInsert });
             // } else res.status(404).send({ message: 'El número de celular no se encuentra disponible' });
         } catch (error) {
             res.status(500).send({ message: 'ocurrió un error en el servidor', error: error.message });
