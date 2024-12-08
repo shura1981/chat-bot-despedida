@@ -17,11 +17,12 @@ const SendMessagesController = {}
 
 SendMessagesController.sendMessages = async () => {
     const timeOut = 5000;
-    const fileName = 'invitacion.webp';
+    const invitacion1 = 'invitacion.webp';
+    const invitacion2 = 'invitacion2.webp';
 
-
-    const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje();
     // const employees = testEmployees;
+
+    const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje(true);
     const campaignModel = await new CampaignModel().getCampaign(1);
     if (!campaignModel) return;
 
@@ -29,6 +30,8 @@ SendMessagesController.sendMessages = async () => {
         try {
             const message = campaignModel.mensaje.replace("[nombre]", employee.nombre);
             const to = `57${employee.celular}`;
+
+            const fileName = employee.amarillo === 0 ? invitacion1 : invitacion2;
 
             await Request.postWhatsappFile({ to, message, fileName })
 

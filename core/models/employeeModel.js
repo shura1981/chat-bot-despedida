@@ -36,7 +36,7 @@ class EmployeeModel {
         return new Promise(async (resolve, reject) => {
             try {
                 const [firsRow] = await query(`
-                    SELECT id, id_empleado, celular, nombre FROM tb_employees WHERE celular LIKE ?;`, [numeroContacto.split("57").pop()]);
+                    SELECT id, id_empleado, celular, nombre, external, amarillo FROM tb_employees WHERE celular LIKE ?;`, [numeroContacto.split("57").pop()]);
                 resolve(firsRow ? firsRow : null);
             } catch (error) {
                 reject(error);
@@ -44,14 +44,21 @@ class EmployeeModel {
         });
     }
     /**
-     * 
+     * @param {boolean} external si es true solo se obtienen los empleados externos de otras ciudades
      * @returns {Promise<Employee[]>} empleados que no tienen mensaje se la campaña
      */
-    obtenerEmpleadosSinMensaje() {
+    obtenerEmpleadosSinMensaje(external = false) {
         return new Promise(async (resolve, reject) => {
             try {
-                const rows = await query(`SELECT e.id, e.id_empleado, e.celular, e.nombre
-FROM tb_employees e LEFT JOIN tb_mensajes m ON e.id_empleado = m.id_employee WHERE m.id_employee IS NULL;`);
+                let querySql = `
+SELECT e.id, e.id_empleado, e.celular, e.nombre, e.external, e.amarillo
+FROM tb_employees e 
+LEFT JOIN tb_mensajes m ON e.id_empleado = m.id_employee 
+WHERE m.id_employee IS NULL`;
+                if (external) {
+                    querySql += ` AND e.external = 1`;
+                }
+                const rows = await query(querySql);
                 resolve(rows ? rows : []);
             } catch (error) {
                 reject(error);
