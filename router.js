@@ -106,8 +106,11 @@ module.exports = (client) => {
     router.get('/message', async (req, res) => {
         try {
             const { to, message } = req.query;
-            // const valid = await client.isRegisteredUser(to);
-            // if (valid) {
+            const valid = await client.isRegisteredUser(to);
+            if (!valid) {
+                res.status(404).send({ message: 'El número de celular no se encuentra disponible' });
+                return;
+            }
             const number = `${to}@c.us`;
             /**@type ResponseClientFile */
             const resWs = await client.sendMessage(number, message.replace(/\\n/g, '\n'), { linkPreview: true });
@@ -118,17 +121,16 @@ module.exports = (client) => {
                 desde: from,
                 para: to,
                 mensaje: message,
-                tipo: ChatModel.optionsType.BOTH,
+                tipo: ChatModel.optionsType.TEXT,
                 dispositivo: 'api-rest',
                 name: from,
-                content_type: ChatModel.optionsContentType.IMAGE,
+                content_type: ChatModel.optionsContentType.TEXT,
                 url: null,
                 port: process.env.PORT
             }
 
             const idInsert = await new ChatModel().insertChat(chat);
             res.status(200).send({ msg: `envidado a ${to}`, payload: resWs, idInsert });
-            // } else res.status(404).send({ message: 'El número de celular no se encuentra disponible' });
         } catch (error) {
             res.status(500).send({ message: 'ocurrió un error en el servidor', error: error.message });
         }

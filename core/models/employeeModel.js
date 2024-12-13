@@ -66,6 +66,21 @@ WHERE m.id_employee IS NULL`;
         });
     }
 
+    /**
+   * @returns {Promise<Employee[]>} empleados que no tienen mensaje se la campaña
+   */
+    obtenerEmpleadosConRespuesta() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let querySql = `
+SELECT e.* FROM tb_mensajes m INNER JOIN tb_employees e ON m.id_employee= e.id_empleado WHERE m.respuesta= 1 AND e.external= 1 ORDER BY e.id ASC;`;
+                const rows = await query(querySql);
+                resolve(rows ? rows : []);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
 
 }
 

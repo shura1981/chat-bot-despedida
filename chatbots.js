@@ -332,7 +332,7 @@ const chatbotWhatsapp = async (msg) => {
 
                 if (!isNumber) {
                     const msgInfoError = `Te escribimos de nutramerican, queremos que confirmes tu asistencia a la fiesta de despedida de este año. ${mensajeRespuestaIncorrecta}`;
-                    await chatController.insertChatReply(msg, msgInfoError);
+                    // await chatController.insertChatReply(msg, msgInfoError);
                     repplyMessage(msg, msgInfoError);
                     return;
                 }
@@ -340,7 +340,7 @@ const chatbotWhatsapp = async (msg) => {
                 if (body == 1) {
                     await chatController.insertChatReply(msg, flujoDeRespuesta.despedidaExternos);
                     await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
-                    repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
+                    repplyMessage(msg, flujoDeRespuesta.despedidaExternos);
                 } else if (body == 2) {
                     await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje);
                     await messageModel.updateMensaje({ respuesta: 2, id_employee: employeer.id_empleado });
@@ -357,7 +357,7 @@ const chatbotWhatsapp = async (msg) => {
 
             if (!isNumber) {
                 const msgInfoError = `Te escribimos de nutramerican, queremos que confirmes tu asistencia a la fiesta de despedida de este año. ${mensajeRespuestaIncorrecta}`;
-                await chatController.insertChatReply(msg, msgInfoError);
+                // await chatController.insertChatReply(msg, msgInfoError);
                 repplyMessage(msg, msgInfoError);
                 return;
             }
@@ -378,7 +378,7 @@ const chatbotWhatsapp = async (msg) => {
         if (regexSegundoFlujo.test(lastMessage)) {
 
             if (!isNumber) {
-                await chatController.insertChatReply(msg, mensajeRespuestaIncorrecta);
+                // await chatController.insertChatReply(msg, mensajeRespuestaIncorrecta);
                 repplyMessage(msg, mensajeRespuestaIncorrecta);
                 return;
             }
@@ -398,7 +398,7 @@ const chatbotWhatsapp = async (msg) => {
         if (regexTercerFlujo.test(lastMessage)) {
 
             if (!isNumber) {
-                await chatController.insertChatReply(msg, mensajeRespuestaIncorrecta);
+                // await chatController.insertChatReply(msg, mensajeRespuestaIncorrecta);
                 repplyMessage(msg, mensajeRespuestaIncorrecta);
                 return;
             }
@@ -418,7 +418,7 @@ const chatbotWhatsapp = async (msg) => {
         if (regexCuartoFlujo.test(lastMessage)) {
 
             if (!isNumber) {
-                await chatController.insertChatReply(msg, mensajeRespuestaIncorrecta);
+                // await chatController.insertChatReply(msg, mensajeRespuestaIncorrecta);
                 repplyMessage(msg, mensajeRespuestaIncorrecta);
                 return;
             }
