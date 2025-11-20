@@ -35,8 +35,9 @@ class EmployeeModel {
     obtenerEmpleado(numeroContacto) {
         return new Promise(async (resolve, reject) => {
             try {
+              const numeroLimpio = numeroContacto.replace(/^57/, '');
                 const [firsRow] = await query(`
-                    SELECT id, id_empleado, celular, nombre, external, amarillo FROM tb_employees WHERE celular LIKE ?;`, [numeroContacto.split("57").pop()]);
+                    SELECT id, id_empleado, celular, nombre, external, amarillo FROM tb_employees WHERE celular LIKE ?;`, [numeroLimpio]);
                 resolve(firsRow ? firsRow : null);
             } catch (error) {
                 reject(error);

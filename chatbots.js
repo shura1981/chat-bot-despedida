@@ -294,24 +294,54 @@ const saveMedia = async (msg) => {
     return null;
 };
 
+async function getPhoneNumber(message) {
+    const jid = message.from || message.author || message.sender?.id;
+
+    if (!jid) return null;
+
+    try {
+        const contact = await message.getContact();
+
+        // Forma oficial y más confiable en 2025
+        if (contact.number) {
+            return contact.number;                    // ej: "584123456789"
+        }
+
+        // Fallback alternativo
+        if (contact.id?._serialized) {
+            return contact.id._serialized.split('@')[0];
+        }
+
+        // Último recurso
+        return jid.split('@')[0];
+
+    } catch (error) {
+        console.error('Error obteniendo contacto:', error);
+        return jid.split('@')[0]; // aunque sea el número largo, algo devuelve
+    }
+}
+
 /**
  * 
  * @param {ClientResponse} msg 
  */
 const chatbotWhatsapp = async (msg) => {
     try {
-        const { from, body } = msg;
-        console.log({ from, body });
+        const { body } = msg;
+
+        const receivedPhoneNumber = await getPhoneNumber(msg);
+
+        console.log({ number: receivedPhoneNumber, body });
 
         // 1. guardar el mensaje en la base de datos
         const filePath = await saveMedia(msg);
-        chatController.insertChat(msg, filePath);
-        const employeer = await employeeController.findEmployee(from.replace('@c.us', ''));
+        chatController.insertChat(msg, filePath, receivedPhoneNumber);
+        const employeer = await employeeController.findEmployee(receivedPhoneNumber);
         if (employeer == null) return; //si el número no está registrado en la base de datos de la campaña no se procesa
 
 
         // 2. determinar la respuesta del chatbot
-        const lastMessage = await chatController.obtenerUltimoChat(from.replace('@c.us', ''));//verificar si el número ya ha sido contactado con el mensaje de la campaña
+        const lastMessage = await chatController.obtenerUltimoChat(receivedPhoneNumber);//verificar si el número ya ha sido contactado con el mensaje de la campaña
 
         if (!lastMessage) {
             return;
@@ -367,7 +397,6 @@ const chatbotWhatsapp = async (msg) => {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
                 await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
-                console.log("llega al flujo 1...");
 
             } else if (body == 2) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.volverAInvitar.mensaje);
@@ -417,7 +446,6 @@ const chatbotWhatsapp = async (msg) => {
 
             return;
         }
-        console.log("úlitmo mensaje:", lastMessage);
 
         if (regexCuartoFlujo.test(lastMessage)) {
 
@@ -431,7 +459,6 @@ const chatbotWhatsapp = async (msg) => {
             // guardar en lugar de recogida
             await messageModel.saveMeetingPlace({ id_employee: employeer.id_empleado, punto_encuentro: PuntosEncuentro.get(parseInt(body)) });
             repplyMessage(msg, flujoDeRespuesta.despedida.mensaje);
-            console.log("llega al flujo 2....");
 
             return;
         }

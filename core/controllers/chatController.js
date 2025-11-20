@@ -80,14 +80,15 @@ const getUrlAndContentType = (filePath) => {
  * 
  * @param {ClientResponse} msg 
  *  @param {string} filePath
+ *  @param {string|null} from
  */
-chatController.insertChat = async (msg, filePath) => {
+chatController.insertChat = async (msg, filePath, from = null) => {
 
-    const { _data, from, to, deviceType, hasMedia } = msg;
+    const { _data, to, deviceType, hasMedia } = msg;
 
     /**@type Chat */
     const chat = {
-        desde: from.replace('@c.us', ''),
+        desde: from,
         para: to.replace('@c.us', ''),
         mensaje: msg.body,
         tipo: filePath ? ChatModel.optionsType.MEDIA : ChatModel.optionsType.TEXT,
