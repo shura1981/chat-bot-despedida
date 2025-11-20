@@ -122,14 +122,15 @@ chatController.insertChat = async (msg, filePath, from = null) => {
  * guarda la respuesta de un chat
  * @param {ClientResponse} msg 
  *  @param {string} reply
+ * @param {string} from
  */
-chatController.insertChatReply = async (msg, reply) => {
+chatController.insertChatReply = async (msg, reply, from) => {
 
-    const { from, to } = msg;
+    const { to } = msg;
 
     /**@type Chat */
     const chat = {
-        para: from.replace('@c.us', ''),
+        para: from,
         desde: to.replace('@c.us', ''),
         mensaje: reply,
         tipo: ChatModel.optionsType.TEXT,

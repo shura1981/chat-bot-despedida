@@ -369,11 +369,11 @@ const chatbotWhatsapp = async (msg) => {
                 }
 
                 if (body == 1) {
-                    await chatController.insertChatReply(msg, flujoDeRespuesta.despedidaExternos);
+                    await chatController.insertChatReply(msg, flujoDeRespuesta.despedidaExternos, receivedPhoneNumber);
                     await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                     repplyMessage(msg, flujoDeRespuesta.despedidaExternos);
                 } else if (body == 2) {
-                    await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje);
+                    await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje, receivedPhoneNumber);
                     await messageModel.updateMensaje({ respuesta: 2, id_employee: employeer.id_empleado });
                     repplyMessage(msg, flujoDeRespuesta.negativo.mensaje);
                 }
@@ -394,12 +394,12 @@ const chatbotWhatsapp = async (msg) => {
             }
 
             if (body == 1) {
-                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje, receivedPhoneNumber);
                 await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
 
             } else if (body == 2) {
-                await chatController.insertChatReply(msg, flujoDeRespuesta.volverAInvitar.mensaje);
+                await chatController.insertChatReply(msg, flujoDeRespuesta.volverAInvitar.mensaje, receivedPhoneNumber);
                 await messageModel.updateMensaje({ respuesta: 2, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.volverAInvitar.mensaje);
             }
@@ -416,11 +416,11 @@ const chatbotWhatsapp = async (msg) => {
             }
 
             if (body == 1) {
-                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje, receivedPhoneNumber);
                 await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
             } else if (body == 2) {
-                await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje);
+                await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje, receivedPhoneNumber);
                 repplyMessage(msg, flujoDeRespuesta.negativo.mensaje);
             }
 
@@ -436,11 +436,11 @@ const chatbotWhatsapp = async (msg) => {
             }
 
             if (body == 1) {
-                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
+                await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje, receivedPhoneNumber);
                 await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
             } else if (body == 2) {
-                await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje);
+                await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje, receivedPhoneNumber);
                 repplyMessage(msg, flujoDeRespuesta.negativo.mensaje);
             }
 
@@ -455,7 +455,7 @@ const chatbotWhatsapp = async (msg) => {
                 return;
             }
 
-            await chatController.insertChatReply(msg, flujoDeRespuesta.despedida.mensaje);
+            await chatController.insertChatReply(msg, flujoDeRespuesta.despedida.mensaje, receivedPhoneNumber);
             // guardar en lugar de recogida
             await messageModel.saveMeetingPlace({ id_employee: employeer.id_empleado, punto_encuentro: PuntosEncuentro.get(parseInt(body)) });
             repplyMessage(msg, flujoDeRespuesta.despedida.mensaje);
