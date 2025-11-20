@@ -14,7 +14,7 @@ const mensajeRespuestaIncorrecta = "Por favor ingresa el número que corresponda
 const flujoDeRespuesta = {
     confirmacion: {
         mensaje: `
-¡Super! 🥳 ahora elije la ruta más cercana de tu casa:
+¡Super! 🥳 ahora elige la ruta más cercana de tu casa:
 
 1️⃣ Rozo. Primer puente.
 2️⃣ Troncal. Parqueadero parque de la caña.
@@ -40,7 +40,7 @@ Simplemente responde con el número correspondiente. ¡Espero tu respuesta! 💪
     },
     despedida: {
         mensaje: `Te esperamos a las 8:30 am en el punto de encuentro seleccionado, no olvides llevar tu traje de baño 🩲🩱🩳. El party será hasta las 6:30 pm`,
-        patron: `¡Super! 🥳 ahora elije la ruta más cercana de tu casa:`
+        patron: `¡Super! 🥳 ahora elige la ruta más cercana de tu casa:`
     },
     despedidaExternos: `¡Super! 🥳 El punto de encuentro y la hora será coordinado con tu administrador de sede. No olvides llevar tu traje de baño 🩲🩱🩳.`
 }
@@ -301,6 +301,7 @@ const saveMedia = async (msg) => {
 const chatbotWhatsapp = async (msg) => {
     try {
         const { from, body } = msg;
+        console.log({ from, body });
 
         // 1. guardar el mensaje en la base de datos
         const filePath = await saveMedia(msg);
@@ -366,6 +367,8 @@ const chatbotWhatsapp = async (msg) => {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje);
                 await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
+                console.log("llega al flujo 1...");
+
             } else if (body == 2) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.volverAInvitar.mensaje);
                 await messageModel.updateMensaje({ respuesta: 2, id_employee: employeer.id_empleado });
@@ -414,6 +417,7 @@ const chatbotWhatsapp = async (msg) => {
 
             return;
         }
+        console.log("úlitmo mensaje:", lastMessage);
 
         if (regexCuartoFlujo.test(lastMessage)) {
 
@@ -427,6 +431,8 @@ const chatbotWhatsapp = async (msg) => {
             // guardar en lugar de recogida
             await messageModel.saveMeetingPlace({ id_employee: employeer.id_empleado, punto_encuentro: PuntosEncuentro.get(parseInt(body)) });
             repplyMessage(msg, flujoDeRespuesta.despedida.mensaje);
+            console.log("llega al flujo 2....");
+
             return;
         }
 
