@@ -16,8 +16,8 @@ const SendMessagesController = {}
 
 SendMessagesController.sendMessages = async () => {
     const timeOut = 5000;
-    const invitacion1 = 'invitacion.webp';
-    const invitacion2 = 'invitacion2.webp';
+    const invitacion1 = 'invitación-2025-v1.jpg';
+    const invitacion2 = 'invitación-2025-v1.jpg';// para los de barranquilla
 
     const employees = testEmployees;
 
