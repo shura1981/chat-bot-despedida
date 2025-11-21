@@ -6,3 +6,4 @@ public/whatsapp
 .wwebjs_auth
 storage_messages
 sessions
+temp/
