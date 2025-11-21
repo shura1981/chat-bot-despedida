@@ -9,7 +9,7 @@ const employeeController = require('./core/controllers/employeeController');
 const { PuntosEncuentro } = require('./core/interfaces/puntoEncuentro.js');
 
 
-const mensajeRespuestaIncorrecta = "Por favor ingresa el número que corresponda a tu respuesta.";
+const mensajeRespuestaIncorrecta = "Por favor ingresa el número que corresponda a tu respuesta. Solo escribe el número. Sin emojis ni caracteres adicionales.";
 
 const flujoDeRespuesta = {
     confirmacion: {
@@ -22,7 +22,7 @@ const flujoDeRespuesta = {
 4️⃣ Terminal logístico. Elitenut. 
 5️⃣ Palmira. Parque Bolivar.
 
-Simplemente responde con el número correspondiente. ¡Espero tu respuesta! 💪⭐`,
+Simplemente responde con el número correspondiente sin emojis ni caracteres adicionales. ¡Espero tu respuesta! 💪⭐`,
         patron: "por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:"
     },
     volverAInvitar: {
