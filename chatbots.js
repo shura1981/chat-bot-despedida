@@ -42,7 +42,7 @@ Simplemente responde con el número correspondiente sin emojis ni caracteres adi
         mensaje: `Te esperamos a las 10:00 am en el punto de encuentro seleccionado. \n\nElige tu mejor outfit y preparate para ganar 🌶️🌮🇲🇽. \n\nEl party sera hasta las 10pm. \n\nOpcional lleva tu traje de baño 🩲🩱🩳.`,
         patron: `¡Super! 🥳 ahora elige la ruta más cercana de tu casa:`
     },
-    despedidaExternos: `¡Super! 🥳 El punto de encuentro y la hora será coordinado con tu administrador de sede. No olvides llevar tu traje de baño 🩲🩱🩳.`
+    despedidaExternos: `¡Super! 🥳 El punto de encuentro y la hora será coordinado con tu administrador de sede.`
 }
 
 /**
