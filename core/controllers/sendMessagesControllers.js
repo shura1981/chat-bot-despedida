@@ -28,15 +28,17 @@ SendMessagesController.sendMessages = async () => {
     const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje(false);
     console.log("total empleados",employees.length);
     
-    let idCampaign = CAMPAIGNS.second;
-    const campaignModel = await new CampaignModel().getCampaign(idCampaign);
-    if (!campaignModel) return;
+    const campaignFirst = await new CampaignModel().getCampaign(CAMPAIGNS.first);
+    const campaignSecond = await new CampaignModel().getCampaign(CAMPAIGNS.second);
+
+    if (!campaignFirst || !campaignSecond) return;
 
     let count = 0;
 
     for (const employee of employees) {
         try {
-            const message = campaignModel.mensaje.replace("[nombre]", employee.nombre);
+            const currentCampaign = count < 172 ? campaignSecond : campaignFirst;
+            const message = currentCampaign.mensaje.replace("[nombre]", employee.nombre);
             const to = `57${employee.celular}`;
 
             const fileName = employee.external == 0 ? invitacion1 : invitacion2;
