@@ -329,6 +329,8 @@ const chatbotWhatsapp = async (msg) => {
     try {
         const { body } = msg;
 
+        if (!body || body.trim() === '') return;
+
         const receivedPhoneNumber = await getPhoneNumber(msg);
 
         console.log({ number: receivedPhoneNumber, body });
