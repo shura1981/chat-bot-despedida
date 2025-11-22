@@ -16,27 +16,41 @@ const testEmployees = [
 const SendMessagesController = {}
 
 SendMessagesController.sendMessages = async () => {
-    const timeOut = 5000;
     const invitacion1 = 'invitación-2025-v1.jpg';
     const invitacion2 = 'invitación-2025-v2.jpg';// para los que están fuera del valle del cauca.
 
-    const employees = testEmployees;
+    // const employees = testEmployees;
 
-    // const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje(false);
+    const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje(false);
+    console.log("total empleados",employees.length);
+    
     const campaignModel = await new CampaignModel().getCampaign(1);
     if (!campaignModel) return;
+
+    let count = 0;
 
     for (const employee of employees) {
         try {
             const message = campaignModel.mensaje.replace("[nombre]", employee.nombre);
             const to = `57${employee.celular}`;
 
-            const fileName = employee.external === 0 ? invitacion1 : invitacion2;
+            const fileName = employee.external == 0 ? invitacion1 : invitacion2;
 
             await Request.postWhatsappFile({ to, message, fileName })
 
-            await pause(timeOut);
-            console.log(`Finished processing employee ${employee.nombre}`);
+            // Generar un delay aleatorio entre 15 y 45 segundos
+            const randomDelay = Math.floor(Math.random() * (45000 - 15000 + 1) + 15000);
+            await pause(randomDelay);
+            
+            console.log(`Finished processing employee ${employee.nombre}`, fileName, to);
+
+            count++;
+            // Pausa por lotes: cada 50 mensajes descansa 3 minutos para mayor seguridad
+            if (count % 50 === 0 && count < employees.length) {
+                console.log(`Lote de 50 mensajes completado. Pausando por 3 minutos...`);
+                await pause(180000);
+            }
+
         } catch (error) {
             console.log(error);
             // guardar log de error
