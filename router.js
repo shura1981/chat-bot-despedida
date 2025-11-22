@@ -46,18 +46,18 @@ module.exports = (client) => {
 
     router.get('/file', async (req, res) => {
         try {
-            const { to, message, fileName, idCampaign=1 } = req.query;
+            const { to, message, fileName, idCampaign = 1 } = req.query;
             const valid = await client.isRegisteredUser(to);
             if (!valid) {
                 res.status(404).send({ message: 'El número de celular no se encuentra disponible' });
                 return;
             }
-            const number = `${to}@c.us`;
+            const numberEmployee = `${to}@c.us`;
             // obtener directorio raiz más public/whatsapp
             const directoryWhatsapp = path.join(__dirname, 'public', 'whatsapp');
             const media = MessageMedia.fromFilePath(`${directoryWhatsapp}/${fileName}`);
             /**@type ResponseClientFile */
-            const response = await client.sendMessage(number, media, { caption: message.replace(/\\n/g, '\n') || null });
+            const response = await client.sendMessage(numberEmployee, media, { caption: message.replace(/\\n/g, '\n') || null });
             let { from } = response;
             from = from.replace('@c.us', '');
             /**@type Chat */
@@ -75,11 +75,12 @@ module.exports = (client) => {
 
             const idInsert = await new ChatModel().insertChat(chat);
             const employee = await new EmployeeModel().obtenerEmpleado(to);
-            if (employee) {
-                const idEmployee = employee.id_empleado;
-                new MensajeModel().insertMensaje(idEmployee, idCampaign);
+            if (!employee) {
+                return res.status(404).send({ message: 'Empleado no encontrado' });
             }
 
+            const idEmployee = employee.id_empleado;
+            new MensajeModel().insertMensaje(idEmployee, idCampaign);
 
             res.status(200).send({ msg: `envidado a ${to}`, payload: response, idInsert });
 
