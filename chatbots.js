@@ -10,7 +10,7 @@ const { PuntosEncuentro } = require('./core/interfaces/puntoEncuentro.js');
 
 
 const mensajeRespuestaIncorrecta = "Por favor ingresa el número que corresponda a tu respuesta. Solo escribe el número. Sin emojis ni caracteres adicionales.";
-
+const patronMensajeInvitacion= "¡Por supuesto que voy! no me lo pierdo por nada del mundo.";
 const flujoDeRespuesta = {
     confirmacion: {
         mensaje: `
@@ -23,7 +23,7 @@ const flujoDeRespuesta = {
 5️⃣ Palmira. Parque Bolivar.
 
 Simplemente responde con el número correspondiente sin emojis ni caracteres adicionales. ¡Espero tu respuesta! 💪⭐`,
-        patron: "por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:"
+        patron: patronMensajeInvitacion
     },
     volverAInvitar: {
         mensaje: `
@@ -32,7 +32,7 @@ Simplemente responde con el número correspondiente sin emojis ni caracteres adi
 1️⃣ ¡Si voy!.
 2️⃣ lo siento pero no puedo ir, de nuevo gracias por la invitación.
 `,
-        patron: "por favor confirma tu asistencia escribiendo el número que corresponda con tu respuesta:"
+        patron: patronMensajeInvitacion
     },
     negativo: {
         mensaje: `¡Qué pena! 😢 esperamos contar contigo para el próximo año.`,
@@ -333,14 +333,11 @@ const chatbotWhatsapp = async (msg) => {
 
         const receivedPhoneNumber = await getPhoneNumber(msg);
 
-        console.log({ number: receivedPhoneNumber, body });
-
         // 1. guardar el mensaje en la base de datos
         const filePath = await saveMedia(msg);
         chatController.insertChat(msg, filePath, receivedPhoneNumber);
         const employeer = await employeeController.findEmployee(receivedPhoneNumber);
         if (employeer == null) return; //si el número no está registrado en la base de datos de la campaña no se procesa
-
 
         // 2. determinar la respuesta del chatbot
         const lastMessage = await chatController.obtenerUltimoChat(receivedPhoneNumber);//verificar si el número ya ha sido contactado con el mensaje de la campaña
@@ -421,6 +418,8 @@ const chatbotWhatsapp = async (msg) => {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.confirmacion.mensaje, receivedPhoneNumber);
                 await messageModel.updateMensaje({ respuesta: 1, id_employee: employeer.id_empleado });
                 repplyMessage(msg, flujoDeRespuesta.confirmacion.mensaje);
+                console.log("debería llegar acá...");
+                
             } else if (body == 2) {
                 await chatController.insertChatReply(msg, flujoDeRespuesta.negativo.mensaje, receivedPhoneNumber);
                 repplyMessage(msg, flujoDeRespuesta.negativo.mensaje);
