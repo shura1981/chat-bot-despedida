@@ -14,6 +14,10 @@ const testEmployees = [
 ];
 
 const SendMessagesController = {}
+const CAMPAIGNS = {
+first: 1,
+second: 2,
+}
 
 SendMessagesController.sendMessages = async () => {
     const invitacion1 = 'invitación-2025-v1.jpg';
@@ -24,7 +28,8 @@ SendMessagesController.sendMessages = async () => {
     const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje(false);
     console.log("total empleados",employees.length);
     
-    const campaignModel = await new CampaignModel().getCampaign(1);
+    let idCampaign = CAMPAIGNS.second;
+    const campaignModel = await new CampaignModel().getCampaign(idCampaign);
     if (!campaignModel) return;
 
     let count = 0;
