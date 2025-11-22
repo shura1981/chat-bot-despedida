@@ -46,7 +46,7 @@ module.exports = (client) => {
 
     router.get('/file', async (req, res) => {
         try {
-            const { to, message, fileName } = req.query;
+            const { to, message, fileName, idCampaign=1 } = req.query;
             const valid = await client.isRegisteredUser(to);
             if (!valid) {
                 res.status(404).send({ message: 'El número de celular no se encuentra disponible' });
@@ -77,7 +77,7 @@ module.exports = (client) => {
             const employee = await new EmployeeModel().obtenerEmpleado(to);
             if (employee) {
                 const idEmployee = employee.id_empleado;
-                new MensajeModel().insertMensaje(idEmployee, 1);
+                new MensajeModel().insertMensaje(idEmployee, idCampaign);
             }
 
 

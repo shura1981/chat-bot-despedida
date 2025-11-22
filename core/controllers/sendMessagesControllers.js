@@ -43,7 +43,7 @@ SendMessagesController.sendMessages = async () => {
 
             const fileName = employee.external == 0 ? invitacion1 : invitacion2;
 
-            await Request.postWhatsappFile({ to, message, fileName })
+            await Request.postWhatsappFile({ to, message, fileName, idCampaign: currentCampaign.id })
             console.log(`Finished processing employee ${employee.nombre}`, fileName, to);
 
             // Generar un delay aleatorio entre 15 y 45 segundos
