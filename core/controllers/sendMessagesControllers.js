@@ -7,10 +7,8 @@ const { Request } = require('../http/request');
  
 
 const testEmployees = [
-    { id: 68, id_empleado: 6394880, celular: "3168848850", nombre: "STEVEN REALPE", external: 0 },
-    { id: 2, id_empleado: 1118292193, celular: "3163485418", nombre: "BRIGITTE GOMEZ", external: 0 },
-    { id: 61, id_empleado: 31323108, celular: "3174733798", nombre: "ANDREAAA MELLIZO", external: 0 },
-    { id: 125, id_empleado: 79218898, celular: "3226351709", nombre: "LINA MARÍA", external: 1 },
+    { id: 187, id_empleado: 6394880, celular: "3168848850", nombre: "STEVEN REALPE", external: 1 },
+    // { id: 61, id_empleado: 31323108, celular: "3174733798", nombre: "ANDREAAA MELLIZO", external: 0 },
 ];
 
 const SendMessagesController = {}
@@ -23,9 +21,9 @@ SendMessagesController.sendMessages = async () => {
     const invitacion1 = 'invitación-2025-v1.jpg';
     const invitacion2 = 'invitación-2025-v2.jpg';// para los que están fuera del valle del cauca.
 
-    // const employees = testEmployees;
+    const employees = testEmployees;
 
-    const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje(false);
+    // const employees = await new EmployeeModel().obtenerEmpleadosSinMensaje(false);
     console.log("total empleados",employees.length);
     
     const campaignFirst = await new CampaignModel().getCampaign(CAMPAIGNS.first);
