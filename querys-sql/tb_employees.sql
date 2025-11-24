@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 21-11-2025 a las 17:22:03
+-- Tiempo de generación: 24-11-2025 a las 00:00:00
 -- Versión del servidor: 10.11.13-MariaDB-0ubuntu0.24.04.1
 -- Versión de PHP: 7.3.33-24+ubuntu24.04.1+deb.sury.org+1
 
@@ -24,6 +24,12 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Eliminar tabla si existe
+--
+
+DROP TABLE IF EXISTS `tb_employees`;
+
+--
 -- Estructura de tabla para la tabla `tb_employees`
 --
 
@@ -41,7 +47,7 @@ CREATE TABLE `tb_employees` (
 --
 
 INSERT INTO `tb_employees` (`id`, `id_empleado`, `celular`, `nombre`, `external`, `amarillo`) VALUES
-(1, 1108561577, '3182244407', 'ABREU ANGELES JOSE MIGUEL ', 1, 0),
+(1, 833104, '3182244407', 'ABREU ANGELES JOSE MIGUEL ', 1, 0),
 (2, 1143875071, '3116399941', 'ACOSTA MONTOYA JULIO CESAR', 0, 0),
 (3, 1005876587, '3207983731', 'ACUÑA DIAZ JUAN GUILLERMO', 1, 0),
 (4, 1044431769, '3242559602', 'ACUÑA DIAZ LAURA SOFIA', 0, 0),
